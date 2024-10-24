@@ -4,10 +4,11 @@ import "./index.css";
 import App from "./App.tsx";
 
 const palette = document.querySelectorAll(".pickpalette-component");
-palette.forEach((div) =>
+palette.forEach((div) =>{
   createRoot(div).render(
     <StrictMode>
-      <App />
+      <App auth={(div as HTMLDivElement)?.dataset.auth || "no present"}/>
     </StrictMode>
   )
+}
 );
