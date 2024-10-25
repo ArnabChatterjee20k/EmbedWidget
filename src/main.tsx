@@ -3,18 +3,15 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 
-// createRoot(document.getElementById("root")!).render(
-//   <StrictMode>
-//     <App  auth={1}/>
-//   </StrictMode>
-// );
-
 const palette = document.querySelectorAll(".pickpalette-component");
-palette.forEach((div) =>{
-  createRoot(div).render(
+
+palette.forEach((div) => {
+  const initialAuth = parseInt((div as HTMLDivElement).dataset.auth as string);
+
+  const root = createRoot(div);
+  root.render(
     <StrictMode>
-      <App auth={parseInt((div as HTMLDivElement).dataset.auth  as string)}/>
+      <App auth={initialAuth} container={div as HTMLDivElement} />
     </StrictMode>
-  )
-}
-);
+  );
+});
