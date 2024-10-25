@@ -9,18 +9,24 @@ async function fetcher(){
   return data
 }
 
-function App({auth}:{auth:string}) {
+function App({auth}:{auth:number}) {
   const [data,setData]  = useState([])
   useEffect(()=>{
     fetcher().then(d=>setData(d))
   },[])
+
+  const [state,setState] = useState(auth || 0)
+
+  useEffect(()=>{
+    setState(auth)
+  },[auth])
 
   const len = data.length
   const randomPalette = data ? data[Math.floor(Math.random() * len)]:[];
 
   return (
     <>
-    <p>{auth}</p>
+    <p>{state}</p>
       {
         randomPalette?.map(color=><div style={{display:"inline-block",background:color,width:"60px",height:"60px"}}></div>)
       }
