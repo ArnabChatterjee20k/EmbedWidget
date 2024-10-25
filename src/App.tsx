@@ -1,66 +1,78 @@
 import { useEffect, useState } from "react";
-import "./App.css";
 
-async function fetcher() {
-  const res = await fetch("https://script.googleusercontent.com/macros/echo?user_content_key=EltFZhx8BqlJWb0nCPiDAO53G5kNQVPS_0IgRA0PymqOZCEKuCWwjoQBRd7lX2PtGRPVLD2N675Q0RfKSVTm36HNFccgmtupOJmA1Yb3SEsKFZqtv3DaNYcMrmhZHmUMWojr9NvTBuBLhyHCd5hHa_YBVKFkpvxJaAk4fISXk6Q4h8l126QIpe7HaVJzvQSWy346rCnQXkUNAJDTMS8wDYjOy4gqZh8CTyf228iPkfdN0UTObcsn2gXIuFltvcj9x4yNiCfAIY3fcEBJNG8wJQ&lib=Mb5GO0xzony3yuV7njcBq-C7IxZbmL8rn");
-  const data = await res.json();
-  return data;
+interface PaletteProps {
+  auth?: number;
+  data?: string[][];
+  onChange?: (auth: number) => void;
 }
 
-function App({ auth, container }: { auth: number; container: HTMLDivElement }) {
-  const [data, setData] = useState([]);
-  const [state, setState] = useState(auth || 0);
-
+export const Palette: React.FC<PaletteProps> = ({ auth = 0, data = [] }) => {
+  const [currentAuth, setCurrentAuth] = useState(auth);
+  
   useEffect(() => {
-    fetcher().then((d) => setData(d));
-  }, []);
-
-  useEffect(() => {
-    setState(auth);
+    setCurrentAuth(auth);
   }, [auth]);
 
+  const len = data.length;
+  const randomPalette = len > 0 ? data[Math.floor(Math.random() * len)] : [];
+
+  return (
+    <div className="palette-container">
+      <p>Auth: {currentAuth}</p>
+      <div className="palette-colors">
+        {randomPalette?.map((color, index) => (
+          <div
+            key={index}
+            className="color-box"
+            style={{
+              background: color,
+              width: "60px",
+              height: "60px",
+              display: "inline-block",
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+interface WrapperProps {
+  container: HTMLElement;
+  data: string[][];
+}
+
+export const WidgetWrapper: React.FC<WrapperProps> = ({ container, data }) => {
+  const [auth, setAuth] = useState(() => 
+    parseInt(container.dataset.auth || "0", 10)
+  );
+
   useEffect(() => {
-    // MutationObserver to detect changes in `data-auth`
+    // Create MutationObserver to watch for attribute changes
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (
           mutation.type === "attributes" &&
           mutation.attributeName === "data-auth"
         ) {
-          const newAuth = parseInt(container.dataset.auth as string);
-          setState(newAuth); // Update state with the new `data-auth` value
+          const newAuth = parseInt(container.dataset.auth || "0", 10);
+          setAuth(newAuth);
         }
       });
     });
 
-    // Start observing the container for attribute changes
     observer.observe(container, { attributes: true });
 
-    // Cleanup function to disconnect observer on unmount
-    return () => {
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, [container]);
 
-  const len = data.length;
-  const randomPalette = data ? data[Math.floor(Math.random() * len)] : [];
-
   return (
-    <>
-      <p>{state}</p>
-      {randomPalette?.map((color, index) => (
-        <div
-          key={index}
-          style={{
-            display: "inline-block",
-            background: color,
-            width: "60px",
-            height: "60px",
-          }}
-        ></div>
-      ))}
-    </>
+    <Palette
+      auth={auth}
+      data={data}
+      onChange={(newAuth) => {
+        container.setAttribute("data-auth", newAuth.toString());
+      }}
+    />
   );
-}
-
-export default App;
+};

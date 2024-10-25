@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   build:{
     rollupOptions:{
+      input:  'src/main.tsx',
       output:{
         entryFileNames:"bundle.js",
         chunkFileNames:"bundle.js",
